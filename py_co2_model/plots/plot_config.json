@@ -1,0 +1,91 @@
+{
+  "figure": {
+    "figsize": [
+      8,
+      5
+    ],
+    "dpi": 300,
+    "autolayout": true
+  },
+  "font": {
+    "family": "sans-serif",
+    "sans-serif": [
+      "Arial",
+      "DejaVu Sans",
+      "Liberation Sans",
+      "Bitstream Vera Sans",
+      "sans-serif"
+    ],
+    "size": 12,
+    "weight": "bold"
+  },
+  "axes": {
+    "titlesize": 16,
+    "titleweight": "bold",
+    "labelsize": 14,
+    "labelweight": "bold",
+    "linewidth": 2,
+    "grid": false
+  },
+  "grid": {
+    "color": "grey",
+    "linestyle": "--",
+    "linewidth": 0.5,
+    "alpha": 0.6
+  },
+  "xtick": {
+    "major.size": 5,
+    "major.width": 1.5,
+    "minor.size": 3,
+    "minor.width": 1,
+    "labelsize": 12,
+    "direction": "in"
+  },
+  "ytick": {
+    "major.size": 5,
+    "major.width": 1.5,
+    "minor.size": 3,
+    "minor.width": 1,
+    "labelsize": 12,
+    "direction": "in"
+  },
+  "legend": {
+    "fontsize": 11
+  },
+  "scatter": {
+    "s": 75,
+    "alpha": 0.6,
+    "edgecolors": "k",
+    "linewidths": 0.5
+  },
+  "errorbar": {
+    "fmt": "o",
+    "alpha": 0.6,
+    "markersize": 8,
+    "capsize": 3,
+    "markeredgewidth": 1.0
+  },
+  "line": {
+    "color": "red",
+    "linewidth": 2
+  },
+  "residual_line": {
+    "color": "red",
+    "linestyle": "--",
+    "linewidth": 2
+  },
+  "k_dashed_line": {
+    "color": "k",
+    "linestyle": "--",
+    "alpha": 0.75,
+    "zorder": 0
+  },
+  "textbox": {
+    "boxstyle": "round,pad=0.5",
+    "facecolor": "wheat",
+    "alpha": 0.5
+  },
+  "savefig": {
+    "dpi": 300
+  }
+}

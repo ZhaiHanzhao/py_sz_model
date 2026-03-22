@@ -1,0 +1,11 @@
+pandas==2.3.2
+numpy==2.2.6
+scipy==1.16.2
+seaborn==0.13.2
+matplotlib==3.10.6
+joblib==1.5.2
+ngboost==0.5.6
+pymc==5.25.1
+pytensor==2.31.7
+scikit-learn==1.7.2
+statsmodels==0.14.5
