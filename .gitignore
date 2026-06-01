@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+.smoke/
+dist/
+build/
+*.egg-info/
+
+/models/*
+!/models/.gitkeep
+/metrics/*
+!/metrics/.gitkeep
+/predictions/*
+!/predictions/.gitkeep
