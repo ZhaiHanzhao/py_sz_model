@@ -1,6 +1,6 @@
 # py_sz_model
 
-Code and data accompanying **Atmospheric CO2 drawdown shaped the 6 Ma Earth-system transition**. Version 0.2.0 matches the manuscript dated 8 October 2026.
+Code and data accompanying **Atmospheric CO2 drawdown shaped the 6 Ma Earth-system transition**. Version 0.2.1 retains the manuscript snapshot dated 8 October 2026 and uses seed 42 for all new stochastic calculations.
 
 The release contains the 99 Quaternary calibration samples, the original 74/25 training/test split, and the 92 Red Clay samples used for the 6.5–4.0 Ma reconstruction. The fitted Gradient Boosting, Random Forest and Ridge models and their archived test predictions are included. Gradient Boosting supplies the final CO2 reconstruction.
 
@@ -67,12 +67,12 @@ The full datasets remain separately archived on Figshare: [Quaternary calibratio
 
 The original training and prediction scripts did not save their Monte Carlo random seeds or draws. Accordingly, the archived model and result files preserve the exact manuscript version. `manuscript build` recomputes statistics from those archived estimates.
 
-New calculations use an explicit default Monte Carlo seed of `20261008`. Repeating a command with the same settings and environment reproduces that new calculation. It does not recover the original unsaved random draws, so new Monte Carlo estimates or a newly trained model can differ from the archived paper values. Training outputs are written outside `frozen/`.
+New calculations use an explicit default Monte Carlo seed of `42`, matching the data-split and estimator seeds. The NumPy Monte Carlo generator is `default_rng` (PCG64). Repeating a command with the same settings and environment reproduces that new calculation. It does not recover the original unsaved random draws, so new Monte Carlo estimates or a newly trained model can differ from the archived paper values. Training outputs are written outside `frozen/`.
 
 To propagate the paper's fitted Gradient Boosting model through a new set of 1,000 input draws per sample:
 
 ```shell
-python -m py_sz_model.prediction --seed 20261008
+python -m py_sz_model.prediction --seed 42
 ```
 
 Outputs go to `predictions/`. The default model is the frozen Gradient Boosting model. Specify `--models RandomForest Ridge` to evaluate the comparison models. The saved R and R_std columns are used unless `--recalculate-r` is passed.
@@ -80,7 +80,7 @@ Outputs go to `predictions/`. The default model is the frozen Gradient Boosting 
 To rerun the original model-selection procedure with a recorded seed:
 
 ```shell
-python -m py_sz_model.training --seed 20261008
+python -m py_sz_model.training --seed 42
 ```
 
 This uses the original split seed 42, 13 predictors, 1,000 independent normal draws for each of 74 training samples, and ordinary 5-fold cross-validation on the sample-contiguous augmented rows. It retains the original three hyperparameter grids. It does not substitute sample-grouped CV or refit on all 99 samples. Model files and `training_run.json` go to `models/`, performance summaries to `metrics/`, and new held-out predictions to `predictions/`.
@@ -90,7 +90,7 @@ To predict using a newly trained model, explicitly pass `--models-dir models`. W
 ## R and elemental-ratio calculations
 
 ```shell
-python -m py_sz_model.r_calculation data/prediction_set/Shilou_features_bulk.CSV --output outputs/Shilou_with_r.csv --seed 20261008
+python -m py_sz_model.r_calculation data/prediction_set/Shilou_features_bulk.CSV --output outputs/Shilou_with_r.csv --seed 42
 ```
 
 R uses 100,000 normal draws by default. The decomposition correction has mean 0‰ and SD 0‰, matching the adopted reconstruction. The same defaults apply to the function, standalone CLI and prediction CLI. The fractionation term is ε = A − BT, with A = 11.98 ± 0.13 and B = 0.12 ± 0.01. The finite R distribution is retained without clipping negative values.

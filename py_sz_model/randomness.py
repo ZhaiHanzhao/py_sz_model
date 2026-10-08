@@ -2,7 +2,7 @@
 
 import numpy as np
 
-MC_RANDOM_SEED = 20261008
+MC_RANDOM_SEED = 42
 RandomState = int | np.random.Generator | None
 
 

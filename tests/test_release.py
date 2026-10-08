@@ -17,6 +17,7 @@ from py_sz_model.prediction import run_predictions
 from py_sz_model.r_calculation import calculate_R_for_dataframe, calculate_R_with_uncertainty, parse_args
 from py_sz_model.ratios import calculate_ratios
 from py_sz_model.training import train_sz_models
+from py_sz_model.randomness import MC_RANDOM_SEED
 
 
 class ManuscriptReleaseTests(unittest.TestCase):
@@ -63,6 +64,17 @@ class ManuscriptReleaseTests(unittest.TestCase):
 
 
 class MonteCarloTests(unittest.TestCase):
+    def test_all_default_seed_entrypoints_use_42(self):
+        from py_sz_model import prediction, training, ratios
+        from py_sz_model.config import DATA_RANDOM_STATE, MODEL_RANDOM_STATE
+        self.assertEqual((MC_RANDOM_SEED, DATA_RANDOM_STATE, MODEL_RANDOM_STATE), (42,42,42))
+        for parser, argv in [(prediction.parse_args,['sz-predict']),
+                             (training.parse_args,['sz-train']),
+                             (parse_args,['sz-calc-r','sample.csv'])]:
+            with patch('sys.argv',argv):
+                self.assertEqual(parser().seed,42)
+        self.assertEqual(inspect.signature(ratios.calculate_ratios).parameters['random_state'].default,42)
+
     def test_default_r_protocol_is_zero_correction_and_100000_draws(self):
         for function in (calculate_R_with_uncertainty,calculate_R_for_dataframe):
             parameters=inspect.signature(function).parameters

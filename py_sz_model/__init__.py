@@ -29,4 +29,4 @@ __all__ = [
     "load_sz_training_data",
 ]
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
