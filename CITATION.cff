@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+message: "Please cite this software version and the associated manuscript when using these data or methods."
+title: "py_sz_model: paleosol S(z) calibration and 6.5-4.0 Ma CO2 reconstruction"
+type: software
+version: 0.2.0
+date-released: 2026-10-08
+authors:
+  - family-names: Zhai
+    given-names: Hanzhao
+    email: zhaihanzhao@smail.nju.edu.cn
+repository-code: "https://github.com/ZhaiHanzhao/py_sz_model"
+url: "https://github.com/ZhaiHanzhao/py_sz_model"

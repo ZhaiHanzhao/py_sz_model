@@ -15,6 +15,8 @@ from sklearn.model_selection import GridSearchCV, train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
+from .randomness import MC_RANDOM_SEED, RandomState, generator
+
 
 @dataclass
 class TrainingModel:
@@ -68,6 +70,7 @@ class TrainingModel:
         x: pd.DataFrame,
         x_uncertainty: pd.DataFrame,
         n_mc_samples: int,
+        random_state: RandomState = MC_RANDOM_SEED,
     ) -> tuple[pd.Series, pd.Series]:
         """Predict with feature uncertainty using Monte Carlo sampling."""
         logging.info("Predicting with uncertainty using %s...", self.model_name)
@@ -76,12 +79,13 @@ class TrainingModel:
         if n_mc_samples <= 0:
             raise ValueError("n_mc_samples must be positive.")
 
+        rng = generator(random_state)
         predictions = []
         x_values = x.to_numpy()
         x_std_values = x_uncertainty.to_numpy()
         for _ in range(n_mc_samples):
             x_sample = pd.DataFrame(
-                np.random.normal(loc=x_values, scale=x_std_values),
+                rng.normal(loc=x_values, scale=x_std_values),
                 columns=x.columns,
                 index=x.index,
             )
@@ -108,6 +112,7 @@ class TrainingModel:
         target_pred: pd.Series,
         target_pred_uncertainty: pd.Series,
         n_mc_samples: int = 1000,
+        random_state: RandomState = MC_RANDOM_SEED,
     ) -> dict[str, float]:
         """Evaluate predictions while propagating target and prediction uncertainty."""
         logging.info("Evaluating %s...", self.model_name)
@@ -116,12 +121,13 @@ class TrainingModel:
         y_pred_mean = target_pred.to_numpy()
         y_pred_std = target_pred_uncertainty.to_numpy()
 
-        y_true_samples = np.random.normal(
+        rng = generator(random_state)
+        y_true_samples = rng.normal(
             loc=np.expand_dims(y_true_mean, axis=-1),
             scale=np.expand_dims(y_true_std, axis=-1),
             size=(len(y_true_mean), n_mc_samples),
         )
-        y_pred_samples = np.random.normal(
+        y_pred_samples = rng.normal(
             loc=np.expand_dims(y_pred_mean, axis=-1),
             scale=np.expand_dims(y_pred_std, axis=-1),
             size=(len(y_pred_mean), n_mc_samples),
@@ -180,12 +186,9 @@ class ModelData:
         if missing_columns:
             raise ValueError(f"Missing columns: {sorted(missing_columns)}")
 
-        if data[list(required_columns)].isnull().to_numpy().any():
-            initial_rows = len(data)
-            data = data.dropna(subset=list(required_columns)).copy()
-            logging.warning("Dropped %s rows because of NA values", initial_rows - len(data))
-        else:
-            data = data.copy()
+        if not np.isfinite(data[list(required_columns)].to_numpy(dtype=float)).all():
+            raise ValueError("Required model inputs must be finite; no samples are silently dropped.")
+        data = data.copy()
 
         self.data = data
         self.features: Optional[pd.DataFrame] = None
@@ -220,22 +223,24 @@ class ModelData:
         self,
         df: pd.DataFrame,
         n_mc_samples: int,
+        random_state: RandomState = MC_RANDOM_SEED,
     ) -> tuple[pd.DataFrame, pd.Series]:
         if self.target_name is None:
             raise ValueError("target_name is required for Monte Carlo training samples.")
 
+        rng = generator(random_state)
         features_data = {}
         for feature in self.features_names:
             means = df[feature].to_numpy().repeat(n_mc_samples)
             stds = df[f"{feature}_std"].to_numpy().repeat(n_mc_samples)
-            features_data[feature] = np.random.normal(means, stds)
+            features_data[feature] = rng.normal(means, stds)
 
         target_means = df[self.target_name].to_numpy().repeat(n_mc_samples)
         target_stds = df[f"{self.target_name}_std"].to_numpy().repeat(n_mc_samples)
         return (
             pd.DataFrame(features_data),
             pd.Series(
-                np.random.normal(target_means, target_stds),
+                rng.normal(target_means, target_stds),
                 name=self.target_name,
             ),
         )
@@ -246,6 +251,7 @@ class ModelData:
         n_mc_samples: int = 0,
         split_strategy: str = "random",
         test_prefix: str = "93L",
+        mc_random_state: RandomState = MC_RANDOM_SEED,
     ) -> None:
         """Prepare features, uncertainties, and optional train/test splits."""
         self._ensure_uncertainty_columns()
@@ -305,6 +311,7 @@ class ModelData:
             self.features_train_mc, self.target_train_mc = self._generate_mc_samples(
                 train_set,
                 n_mc_samples,
+                mc_random_state,
             )
         else:
             self.features_train_mc = None

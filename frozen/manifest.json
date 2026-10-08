@@ -1,0 +1,191 @@
+{
+  "release_date": "2026-10-08",
+  "manuscript": "Atmospheric CO2 drawdown shaped the 6 Ma Earth-system transition",
+  "calibration_samples": 99,
+  "training_samples": 74,
+  "test_samples": 25,
+  "reconstruction_samples": {
+    "Jiaxian": 60,
+    "Shilou": 32
+  },
+  "age_interval_Ma": [
+    4.0,
+    6.5
+  ],
+  "excluded_sample_ids": [
+    "2-SL01_2420",
+    "2-SL01_2450"
+  ],
+  "exclusion_reason": "Sample problems identified by the author.",
+  "models": {
+    "GradientBoosting": {
+      "n_training_samples": 74,
+      "n_augmented_rows": 74000,
+      "n_test_samples": 25,
+      "features": [
+        "Xlf",
+        "aFe",
+        "aSi",
+        "aAl",
+        "fFe",
+        "aFe/aSi",
+        "aFe/aAl",
+        "aSi/aAl",
+        "aFe/fFe",
+        "aSi/fFe",
+        "aAl/fFe",
+        "d18Oc",
+        "D"
+      ],
+      "best_params": {
+        "model__learning_rate": 0.05,
+        "model__max_depth": 3,
+        "model__n_estimators": 50
+      }
+    },
+    "RandomForest": {
+      "n_training_samples": 74,
+      "n_augmented_rows": 74000,
+      "n_test_samples": 25,
+      "features": [
+        "Xlf",
+        "aFe",
+        "aSi",
+        "aAl",
+        "fFe",
+        "aFe/aSi",
+        "aFe/aAl",
+        "aSi/aAl",
+        "aFe/fFe",
+        "aSi/fFe",
+        "aAl/fFe",
+        "d18Oc",
+        "D"
+      ],
+      "best_params": {
+        "model__max_depth": 10,
+        "model__min_samples_split": 2,
+        "model__n_estimators": 50
+      }
+    },
+    "Ridge": {
+      "n_training_samples": 74,
+      "n_augmented_rows": 74000,
+      "n_test_samples": 25,
+      "features": [
+        "Xlf",
+        "aFe",
+        "aSi",
+        "aAl",
+        "fFe",
+        "aFe/aSi",
+        "aFe/aAl",
+        "aSi/aAl",
+        "aFe/fFe",
+        "aSi/fFe",
+        "aAl/fFe",
+        "d18Oc",
+        "D"
+      ],
+      "best_params": {
+        "model__alpha": 100.0
+      }
+    }
+  },
+  "historical_mc_seed": null,
+  "historical_mc_note": "The original Monte Carlo draws were not saved. Frozen model and result files preserve the manuscript version; seeded new runs are reproducible recomputations, not bitwise recovery of the historical draws.",
+  "verified_runtime": {
+    "python": "3.13.7",
+    "numpy": "2.2.6",
+    "pandas": "2.3.2",
+    "scikit-learn": "1.7.2",
+    "scipy": "1.16.3",
+    "joblib": "1.5.2"
+  },
+  "files": [
+    {
+      "path": "data/800kyr_amorphous_with_particlesize.CSV",
+      "sha256": "a764c6bed107ca4ed34f9ab9b83c05ca562afbb05038113986fd7c370a13d6d4"
+    },
+    {
+      "path": "data/calibration_split.csv",
+      "sha256": "e23e8177e9c92cd9111a43f7a68c6dda582d1d6d9fae9434c9fc3bb221eab626"
+    },
+    {
+      "path": "frozen/reconstructions/Jiaxian_CO2.csv",
+      "sha256": "a7b16718a24b7d11fc7e0828b049470cb700f532513eda063eea2f32421d0b8e"
+    },
+    {
+      "path": "data/prediction_set/Jiaxian_features_bulk.CSV",
+      "sha256": "e9725bb1668736dd91841b5c5d6b4d9be0839ebdbb7539c33c5e90d8d6c4df3d"
+    },
+    {
+      "path": "frozen/reconstructions/Shilou_CO2.csv",
+      "sha256": "dd3bed492fc4d9365d6dd6bdd1564c2ae307e2a6df766ff7823800e9483cbec9"
+    },
+    {
+      "path": "data/prediction_set/Shilou_features_bulk.CSV",
+      "sha256": "95593cae5620a2cc17998b813cdb08ecfd8d9e8c6928b486412cd9e52cd0b36f"
+    },
+    {
+      "path": "data/manuscript_samples.csv",
+      "sha256": "3d21ce026a34e00fee78e3b6e83385112f45b634699a0a2bf68090a6154abda6"
+    },
+    {
+      "path": "frozen/models/GradientBoosting_sz.joblib",
+      "sha256": "b73537bdbd788900844524912d5b41e901b76574849d86f8deda7bb53c9b7f4e"
+    },
+    {
+      "path": "frozen/test_predictions/GradientBoosting_sz.csv",
+      "sha256": "6aed12dd67263e65efe4142fbc901969695803c408ba2664c090bd67a1bc1130"
+    },
+    {
+      "path": "frozen/metrics/GradientBoosting_sz.csv",
+      "sha256": "14e537024bad565692675f787be13eabff9de359ce6f425eaf751fd42d3f1f9b"
+    },
+    {
+      "path": "frozen/models/RandomForest_sz.joblib",
+      "sha256": "baa2ce5386971eebc3f7a6338ab9a7ee7b12f14e0e7e3e74e01d5266f5048453"
+    },
+    {
+      "path": "frozen/test_predictions/RandomForest_sz.csv",
+      "sha256": "4d56cbe4709926b8033dabc4f75925046dbf416ce7e48e8cf2fecafc328d7a50"
+    },
+    {
+      "path": "frozen/metrics/RandomForest_sz.csv",
+      "sha256": "20899e927f6278714426a45c87c828c2b073ff14506669259cef682735e18468"
+    },
+    {
+      "path": "frozen/models/Ridge_sz.joblib",
+      "sha256": "14568e16c2562993bbd943e26d13af9d02778e5cdfd95df858348574e606bf0b"
+    },
+    {
+      "path": "frozen/test_predictions/Ridge_sz.csv",
+      "sha256": "5d0c725637ac1c5e8671ce54d0cedc0c24d1567eae589d80cd92164f7a46f09c"
+    },
+    {
+      "path": "frozen/metrics/Ridge_sz.csv",
+      "sha256": "c5337c7d1e9a95da28ac4c42bfc9ab17585aef586a2f9e4f0038c3c203891499"
+    },
+    {
+      "path": "data/proxy_measurements.csv",
+      "sha256": "ae2aa08150756d22002ab125ac9650863b1ffbb4f4d68cf4ab6857375885c503"
+    },
+    {
+      "path": "frozen/proxy_checks/gb_predictions.csv",
+      "sha256": "4d14028e43213ca01c43ebb10f0045c110ff8ad7207304aabafee3eea18ff64b"
+    },
+    {
+      "path": "frozen/proxy_checks/gb_metrics.csv",
+      "sha256": "be85021ab60793687d81edfd3f39c51c80c7b0964bc5bf6d989b2b11f77a0698"
+    },
+    {
+      "path": "frozen/statistics/figure2c_pairs.csv",
+      "sha256": "202d1fc9f666b78b5d53664d10658626447021da3f1f2715591657133b9c51f6"
+    },
+    {
+      "path": "frozen/statistics/figure2c_validation.json",
+      "sha256": "964d23ced19cb8bdd7b2181f164f0021a3774be2175c767346517110faeae4c5"
+    }
+  ]
+}

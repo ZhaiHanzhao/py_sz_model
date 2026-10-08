@@ -8,8 +8,7 @@ import numpy as np
 import pandas as pd
 
 from .config import (
-    MODEL_NAMES,
-    MODELS_DIR,
+    FROZEN_MODELS_DIR,
     PREDICTION_FILE_NAMES,
     PREDICTION_SET_DIR,
     PREDICTIONS_DIR,
@@ -18,6 +17,7 @@ from .config import (
 )
 from .models import ModelData
 from .r_calculation import calculate_R_for_dataframe
+from .randomness import MC_RANDOM_SEED, RandomState, generator
 
 
 def default_prediction_files(data_dir: Path) -> list[Path]:
@@ -33,6 +33,7 @@ def _prepare_prediction_dataframe(
     decomp_corr_mean: float,
     decomp_corr_std: float,
     write_r: bool,
+    random_state: RandomState = MC_RANDOM_SEED,
 ) -> pd.DataFrame:
     df = pd.read_csv(input_file)
     needs_r = recalculate_r or not {"R", "R_std"}.issubset(df.columns)
@@ -44,6 +45,7 @@ def _prepare_prediction_dataframe(
             ci_level=r_ci_level,
             decomp_corr_mean=decomp_corr_mean,
             decomp_corr_std=decomp_corr_std,
+            random_state=random_state,
         )
         if write_r:
             df.to_csv(input_file, index=False)
@@ -53,9 +55,9 @@ def _prepare_prediction_dataframe(
 
 def predict_file(
     input_file: Path,
-    models_dir: Path = MODELS_DIR,
+    models_dir: Path = FROZEN_MODELS_DIR,
     output_dir: Path = PREDICTIONS_DIR,
-    model_names: list[str] | tuple[str, ...] = MODEL_NAMES,
+    model_names: list[str] | tuple[str, ...] = ("GradientBoosting",),
     n_mc_samples: int = 1000,
     recalculate_r: bool = False,
     r_simulations: int = 100000,
@@ -63,8 +65,10 @@ def predict_file(
     decomp_corr_mean: float = 0.0,
     decomp_corr_std: float = 0.0,
     write_r: bool = False,
+    random_state: RandomState = MC_RANDOM_SEED,
 ) -> list[Path]:
     """Predict Sz and CO2 for one Shilou/Jiaxian feature file."""
+    rng = generator(random_state)
     df = _prepare_prediction_dataframe(
         input_file=input_file,
         recalculate_r=recalculate_r,
@@ -73,6 +77,7 @@ def predict_file(
         decomp_corr_mean=decomp_corr_mean,
         decomp_corr_std=decomp_corr_std,
         write_r=write_r,
+        random_state=rng,
     )
 
     data = ModelData(
@@ -90,14 +95,14 @@ def predict_file(
     for model_name, wrapper in models.items():
         model_path = models_dir / f"{model_name}_sz.joblib"
         if not model_path.exists():
-            logging.warning("Model file not found: %s. Skipping.", model_path)
-            continue
+            raise FileNotFoundError(f"Model file not found: {model_path}")
 
         wrapper.load_model(model_path)
         mean_pred, std_pred = wrapper.predict_with_uncertainty(
             x=data.features,
             x_uncertainty=data.features_uncertainty,
             n_mc_samples=n_mc_samples,
+            random_state=rng,
         )
 
         r_mean = df["R"].astype(float)
@@ -126,9 +131,9 @@ def predict_file(
 def run_predictions(
     input_files: list[Path] | None = None,
     data_dir: Path = PREDICTION_SET_DIR,
-    models_dir: Path = MODELS_DIR,
+    models_dir: Path = FROZEN_MODELS_DIR,
     output_dir: Path = PREDICTIONS_DIR,
-    model_names: list[str] | tuple[str, ...] = MODEL_NAMES,
+    model_names: list[str] | tuple[str, ...] = ("GradientBoosting",),
     n_mc_samples: int = 1000,
     recalculate_r: bool = False,
     r_simulations: int = 100000,
@@ -136,14 +141,15 @@ def run_predictions(
     decomp_corr_mean: float = 0.0,
     decomp_corr_std: float = 0.0,
     write_r: bool = False,
+    random_state: RandomState = MC_RANDOM_SEED,
 ) -> list[Path]:
     """Run predictions for the default Shilou and Jiaxian files."""
     files = input_files if input_files is not None else default_prediction_files(data_dir)
     outputs = []
+    rng = generator(random_state)
     for input_file in files:
         if not input_file.exists():
-            logging.warning("Input file not found: %s. Skipping.", input_file)
-            continue
+            raise FileNotFoundError(f"Input file not found: {input_file}")
         outputs.extend(
             predict_file(
                 input_file=input_file,
@@ -157,6 +163,7 @@ def run_predictions(
                 decomp_corr_mean=decomp_corr_mean,
                 decomp_corr_std=decomp_corr_std,
                 write_r=write_r,
+                random_state=rng,
             )
         )
     return outputs
@@ -166,10 +173,11 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Predict Shilou/Jiaxian Sz and CO2.")
     parser.add_argument("--input", nargs="*", type=Path, help="Input CSV files.")
     parser.add_argument("--data-dir", type=Path, default=PREDICTION_SET_DIR)
-    parser.add_argument("--models-dir", type=Path, default=MODELS_DIR)
+    parser.add_argument("--models-dir", type=Path, default=FROZEN_MODELS_DIR)
     parser.add_argument("--output-dir", type=Path, default=PREDICTIONS_DIR)
-    parser.add_argument("--models", nargs="+", default=list(MODEL_NAMES))
+    parser.add_argument("--models", nargs="+", default=["GradientBoosting"])
     parser.add_argument("--mc-samples", type=int, default=1000)
+    parser.add_argument("--seed", type=int, default=MC_RANDOM_SEED)
     parser.add_argument("--recalculate-r", action="store_true")
     parser.add_argument("--r-simulations", type=int, default=100000)
     parser.add_argument("--r-ci-level", type=int, default=90)
@@ -199,6 +207,7 @@ def main() -> None:
         decomp_corr_mean=args.decomp_corr_mean,
         decomp_corr_std=args.decomp_corr_std,
         write_r=args.write_r,
+        random_state=args.seed,
     )
     for path in outputs:
         print(path)

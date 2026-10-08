@@ -1,14 +1,16 @@
 """Train Sz models without plotting side effects."""
 
 import argparse
+import json
 import logging
 from pathlib import Path
 
 import pandas as pd
 
-from .config import METRICS_DIR, MODEL_NAMES, MODELS_DIR, TRAINING_DATA_PATH, build_models
+from .config import FROZEN_DIR, METRICS_DIR, MODEL_NAMES, MODELS_DIR, PREDICTIONS_DIR, TRAINING_DATA_PATH, build_models
 from .models import ModelData
 from .config import load_sz_training_data
+from .randomness import MC_RANDOM_SEED, generator
 
 
 def _training_inputs(data: ModelData) -> tuple[pd.DataFrame, pd.Series]:
@@ -31,14 +33,23 @@ def train_sz_models(
     n_jobs: int = -1,
     split_strategy: str = "random",
     test_prefix: str = "93L",
+    predictions_dir: Path = PREDICTIONS_DIR,
+    seed: int = MC_RANDOM_SEED,
 ) -> list[Path]:
     """Train selected Sz models and return saved model paths."""
+    if n_mc_samples <= 0:
+        raise ValueError("n_mc_samples must be positive.")
+    for directory in (models_dir, metrics_dir, predictions_dir):
+        if directory.resolve().is_relative_to(FROZEN_DIR.resolve()):
+            raise ValueError("New training outputs cannot overwrite the frozen manuscript files.")
+    rng = generator(seed)
     data = load_sz_training_data(data_path)
     data.pre_process(
         test_size=test_size,
         n_mc_samples=n_mc_samples,
         split_strategy=split_strategy,
         test_prefix=test_prefix,
+        mc_random_state=rng,
     )
     x_train, y_train = _training_inputs(data)
 
@@ -63,6 +74,7 @@ def train_sz_models(
             data.features_test,
             data.features_test_uncertainty,
             n_mc_samples,
+            random_state=rng,
         )
         metrics = model.evaluate(
             target_test=data.target_test,
@@ -70,6 +82,7 @@ def train_sz_models(
             target_pred=mean_pred,
             target_pred_uncertainty=std_pred,
             n_mc_samples=n_mc_samples,
+            random_state=rng,
         )
         metrics_dir.mkdir(parents=True, exist_ok=True)
         metrics_path = metrics_dir / f"{model_name}_{data.dataset_name}.csv"
@@ -79,6 +92,21 @@ def train_sz_models(
             index_label="model",
         )
         logging.info("Saved metrics to %s", metrics_path)
+        predictions_dir.mkdir(parents=True, exist_ok=True)
+        held_out = data.test_set.copy()
+        held_out["prediction"] = mean_pred
+        held_out["prediction_uncertainty"] = std_pred
+        held_out.to_csv(predictions_dir / f"{model_name}_{data.dataset_name}.csv", index=False)
+
+    models_dir.mkdir(parents=True, exist_ok=True)
+    (models_dir / "training_run.json").write_text(json.dumps({
+        "seed": seed, "mc_samples": n_mc_samples, "cv_folds": cv_folds,
+        "cv_scheme": "ordinary KFold on sample-contiguous Monte Carlo rows",
+        "train_ids": data.train_set["Sample_ID"].tolist(),
+        "test_ids": [] if data.test_set is None else data.test_set["Sample_ID"].tolist(),
+        "best_parameters": {name: model.trained_model.best_params_ for name, model in models.items()},
+        "note": "Seeded recomputation; original manuscript Monte Carlo draws were not archived.",
+    }, indent=2) + "\n", encoding="utf-8")
 
     return saved_paths
 
@@ -88,9 +116,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--data", type=Path, default=TRAINING_DATA_PATH)
     parser.add_argument("--models-dir", type=Path, default=MODELS_DIR)
     parser.add_argument("--metrics-dir", type=Path, default=METRICS_DIR)
+    parser.add_argument("--predictions-dir", type=Path, default=PREDICTIONS_DIR)
     parser.add_argument("--models", nargs="+", default=list(MODEL_NAMES))
     parser.add_argument("--test-size", type=float, default=0.25)
     parser.add_argument("--mc-samples", type=int, default=1000)
+    parser.add_argument("--seed", type=int, default=MC_RANDOM_SEED)
     parser.add_argument("--cv-folds", type=int, default=5)
     parser.add_argument("--n-jobs", type=int, default=-1)
     parser.add_argument("--split-strategy", choices=["random", "prefix"], default="random")
@@ -116,6 +146,8 @@ def main() -> None:
         n_jobs=args.n_jobs,
         split_strategy=args.split_strategy,
         test_prefix=args.test_prefix,
+        predictions_dir=args.predictions_dir,
+        seed=args.seed,
     )
     for path in saved_paths:
         print(path)

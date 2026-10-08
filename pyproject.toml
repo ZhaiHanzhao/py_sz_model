@@ -4,14 +4,15 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "py-sz-model"
-version = "0.1.0"
-description = "Core Sz model training and Shilou/Jiaxian CO2 prediction."
+version = "0.2.0"
+description = "Manuscript release of the 99-sample Sz calibration and 92-sample CO2 reconstruction."
 requires-python = ">=3.10"
 dependencies = [
-    "joblib",
-    "numpy",
-    "pandas",
-    "scikit-learn",
+    "joblib>=1.5,<2",
+    "numpy>=2.2,<3",
+    "pandas>=2.3,<3",
+    "scipy>=1.10,<2",
+    "scikit-learn==1.7.2",
 ]
 
 [project.optional-dependencies]
@@ -21,6 +22,9 @@ fast = ["numba"]
 sz-train = "py_sz_model.training:main"
 sz-predict = "py_sz_model.prediction:main"
 sz-calc-r = "py_sz_model.r_calculation:main"
+sz-ratios = "py_sz_model.ratios:main"
+sz-manuscript = "py_sz_model.manuscript:main"
+sz-proxy-checks = "py_sz_model.proxy_checks:main"
 
 [tool.setuptools.packages.find]
 where = ["."]

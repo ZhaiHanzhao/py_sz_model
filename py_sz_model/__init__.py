@@ -8,7 +8,14 @@ from .config import (
     load_sz_training_data,
 )
 from .models import ModelData, TrainingModel
-from .r_calculation import calculate_R_for_dataframe, calculate_R_with_uncertainty
+
+
+def __getattr__(name: str):
+    """Keep the public R helpers without importing the CLI before runpy."""
+    if name in {"calculate_R_for_dataframe", "calculate_R_with_uncertainty"}:
+        from . import r_calculation
+        return getattr(r_calculation, name)
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 __all__ = [
     "MODEL_NAMES",
@@ -22,4 +29,4 @@ __all__ = [
     "load_sz_training_data",
 ]
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"

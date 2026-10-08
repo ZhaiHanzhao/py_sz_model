@@ -8,6 +8,8 @@ from typing import Callable
 import numpy as np
 import pandas as pd
 
+from .randomness import MC_RANDOM_SEED, RandomState, generator
+
 try:
     import numba
 except ImportError:
@@ -54,10 +56,11 @@ def calculate_R_with_uncertainty(
     d13Ca_std: float,
     T: float,
     T_std: float,
-    decomp_corr_mean: float = -1.0,
-    decomp_corr_std: float = 0.5,
-    num_simulations: int = 10000,
+    decomp_corr_mean: float = 0.0,
+    decomp_corr_std: float = 0.0,
+    num_simulations: int = 100000,
     ci_level: int = 90,
+    random_state: RandomState = MC_RANDOM_SEED,
 ) -> dict:
     """Calculate R and uncertainty with Monte Carlo simulation."""
     if num_simulations <= 0:
@@ -68,14 +71,15 @@ def calculate_R_with_uncertainty(
     A_mean, A_std = 11.98, 0.13
     B_mean, B_std = 0.12, 0.01
 
+    rng = generator(random_state)
     R_samples = core_monte_carlo_calculation_corrected(
-        np.random.normal(d13Cc, d13Cc_std, num_simulations),
-        np.random.normal(d13Co, d13Co_std, num_simulations),
-        np.random.normal(d13Ca, d13Ca_std, num_simulations),
-        np.random.normal(T, T_std, num_simulations),
-        np.random.normal(A_mean, A_std, num_simulations),
-        np.random.normal(B_mean, B_std, num_simulations),
-        np.random.normal(decomp_corr_mean, decomp_corr_std, num_simulations),
+        rng.normal(d13Cc, d13Cc_std, num_simulations),
+        rng.normal(d13Co, d13Co_std, num_simulations),
+        rng.normal(d13Ca, d13Ca_std, num_simulations),
+        rng.normal(T, T_std, num_simulations),
+        rng.normal(A_mean, A_std, num_simulations),
+        rng.normal(B_mean, B_std, num_simulations),
+        rng.normal(decomp_corr_mean, decomp_corr_std, num_simulations),
     )
 
     R_samples_clean = R_samples[np.isfinite(R_samples)]
@@ -118,10 +122,11 @@ def get_column_name(df: pd.DataFrame, field_name: str) -> str | None:
 
 def calculate_R_for_dataframe(
     df: pd.DataFrame,
-    num_simulations: int = 10000,
+    num_simulations: int = 100000,
     ci_level: int = 90,
-    decomp_corr_mean: float = -1.0,
-    decomp_corr_std: float = 0.5,
+    decomp_corr_mean: float = 0.0,
+    decomp_corr_std: float = 0.0,
+    random_state: RandomState = MC_RANDOM_SEED,
 ) -> pd.DataFrame:
     """Calculate R columns for every row in a dataframe."""
     missing_columns = []
@@ -143,6 +148,7 @@ def calculate_R_for_dataframe(
     result_df[ci_low_col] = np.nan
     result_df[ci_high_col] = np.nan
 
+    rng = generator(random_state)
     for idx, row in result_df.iterrows():
         try:
             results = calculate_R_with_uncertainty(
@@ -174,13 +180,14 @@ def calculate_R_for_dataframe(
                 decomp_corr_std=decomp_corr_std,
                 num_simulations=num_simulations,
                 ci_level=ci_level,
+                random_state=rng,
             )
             result_df.at[idx, "R"] = results["R_mean"]
             result_df.at[idx, "R_std"] = results["R_std"]
             result_df.at[idx, ci_low_col] = results["R_ci_lower"]
             result_df.at[idx, ci_high_col] = results["R_ci_upper"]
         except Exception as exc:
-            print(f"Warning: failed to calculate R for row {idx}: {exc}")
+            raise ValueError(f"Failed to calculate R for row {idx}: {exc}") from exc
 
     return result_df
 
@@ -199,7 +206,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--num-simulations",
         type=int,
-        default=10000,
+        default=100000,
         help="Number of Monte Carlo simulations per row.",
     )
     parser.add_argument(
@@ -208,8 +215,9 @@ def parse_args() -> argparse.Namespace:
         default=90,
         help="Confidence interval level to use for R.",
     )
-    parser.add_argument("--decomp-corr-mean", type=float, default=-1.0)
-    parser.add_argument("--decomp-corr-std", type=float, default=0.5)
+    parser.add_argument("--decomp-corr-mean", type=float, default=0.0)
+    parser.add_argument("--decomp-corr-std", type=float, default=0.0)
+    parser.add_argument("--seed", type=int, default=MC_RANDOM_SEED)
     return parser.parse_args()
 
 
@@ -228,6 +236,7 @@ def main() -> None:
         ci_level=args.ci_level,
         decomp_corr_mean=args.decomp_corr_mean,
         decomp_corr_std=args.decomp_corr_std,
+        random_state=args.seed,
     )
     output_path.parent.mkdir(parents=True, exist_ok=True)
     result_df.to_csv(output_path, index=False)
