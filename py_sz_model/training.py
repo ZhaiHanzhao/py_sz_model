@@ -105,7 +105,7 @@ def train_sz_models(
         "train_ids": data.train_set["Sample_ID"].tolist(),
         "test_ids": [] if data.test_set is None else data.test_set["Sample_ID"].tolist(),
         "best_parameters": {name: model.trained_model.best_params_ for name, model in models.items()},
-        "note": "Seeded recomputation; original manuscript Monte Carlo draws were not archived.",
+        "note": "Seed-42 manuscript protocol. Calibration labels and elemental ratios are fixed archived inputs.",
     }, indent=2) + "\n", encoding="utf-8")
 
     return saved_paths

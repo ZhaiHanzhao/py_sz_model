@@ -1,25 +1,18 @@
 {
-  "age_min_ma": 4.0,
-  "age_max_ma": 6.5,
-  "actual_age_min_ma": 4.16447021,
-  "actual_age_max_ma": 6.467923855,
-  "input_pairs": 97,
-  "excluded_outside_window": 65,
-  "excluded_nonfinite_in_window": 0,
   "n": 32,
   "within_combined_1sigma": 20,
   "within_percent": 62.5,
-  "slope": 0.3569899194800449,
-  "intercept": 0.5536302615967813,
-  "r_squared": 0.2908540845079169,
-  "p_value": 0.0014466657665656401,
-  "agreement_definition": "abs(ratio_Sz-ratio_1R) <= hypot(ratio_Sz_std,ratio_1R_std)",
-  "fit_method": "OLS; displayed ratio uncertainties are not incorporated in the fit",
+  "r_squared": 0.2992994075079568,
+  "p_value": 0.0011942844255129557,
+  "slope": 0.3516802543481628,
+  "intercept": 0.551747429794204,
+  "fit": "OLS; displayed uncertainties are not fitted",
+  "agreement": "abs(y-x) <= hypot(sigma_x,sigma_y), uncorrelated errors",
   "reported": {
     "n": "32",
     "within_count": "20",
     "within_percent": "62.5",
-    "r_squared": "0.291",
-    "p_value": "0.0014"
+    "r_squared": "0.299",
+    "p_value": "0.0012"
   }
 }

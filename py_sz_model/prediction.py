@@ -1,6 +1,7 @@
 """Predict Shilou/Jiaxian Sz and CO2 from trained Sz models."""
 
 import argparse
+from copy import deepcopy
 import logging
 from pathlib import Path
 
@@ -66,9 +67,11 @@ def predict_file(
     decomp_corr_std: float = 0.0,
     write_r: bool = False,
     random_state: RandomState = MC_RANDOM_SEED,
+    r_random_state: RandomState | None = None,
 ) -> list[Path]:
     """Predict Sz and CO2 for one Shilou/Jiaxian feature file."""
     rng = generator(random_state)
+    r_rng = deepcopy(rng) if r_random_state is None else generator(r_random_state)
     df = _prepare_prediction_dataframe(
         input_file=input_file,
         recalculate_r=recalculate_r,
@@ -77,7 +80,7 @@ def predict_file(
         decomp_corr_mean=decomp_corr_mean,
         decomp_corr_std=decomp_corr_std,
         write_r=write_r,
-        random_state=rng,
+        random_state=r_rng,
     )
 
     data = ModelData(
@@ -147,6 +150,8 @@ def run_predictions(
     files = input_files if input_files is not None else default_prediction_files(data_dir)
     outputs = []
     rng = generator(random_state)
+    # R and S(z) have separate streams; recalculating R must not change S(z) draws.
+    r_rng = deepcopy(rng)
     for input_file in files:
         if not input_file.exists():
             raise FileNotFoundError(f"Input file not found: {input_file}")
@@ -164,6 +169,7 @@ def run_predictions(
                 decomp_corr_std=decomp_corr_std,
                 write_r=write_r,
                 random_state=rng,
+                r_random_state=r_rng,
             )
         )
     return outputs

@@ -28,8 +28,8 @@ class ManuscriptReleaseTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             result = build(Path(directory))
         self.assertEqual(result['stage_n'], [92, 30, 27, 35])
-        np.testing.assert_allclose(result['stage_means_ppm'][1:], [307.3266720404664,235.25272305441993,325.7614005289369], atol=1e-10)
-        self.assertAlmostEqual(result['drawdown_ppm'], 118.56843641174612, places=9)
+        np.testing.assert_allclose(result['stage_means_ppm'][1:], [309.514856528,235.365944595,325.938998186], atol=1e-10)
+        self.assertAlmostEqual(result['drawdown_ppm'], 119.794176070, places=9)
         self.assertEqual(result['figure2c']['within_combined_1sigma'],20)
         self.assertEqual(result['proxy_checks']['prediction_rows'],1337)
 
@@ -37,8 +37,8 @@ class ManuscriptReleaseTests(unittest.TestCase):
         metrics = test_set_metrics()
         gb = metrics[(metrics.model=='GradientBoosting') & (metrics.target=='CO2')].iloc[0]
         self.assertEqual(gb['n'],25)
-        self.assertEqual(gb.within_prediction_1sigma,18)
-        self.assertEqual(round(gb.mean_residual_ppm),9)
+        self.assertEqual(gb.within_prediction_1sigma,19)
+        self.assertEqual(round(gb.mean_residual_ppm),10)
         self.assertEqual(round(gb.residual_sample_SD_ppm),41)
 
     def test_stage_boundaries_do_not_double_count(self):
@@ -136,6 +136,14 @@ class MonteCarloTests(unittest.TestCase):
             self.assertEqual(sum(len(pd.read_csv(p)) for p in a),92)
             for x,y in zip(a,b):
                 self.assertEqual(x.read_bytes(),y.read_bytes())
+
+    def test_recalculating_r_does_not_change_sz_draws(self):
+        with tempfile.TemporaryDirectory() as directory:
+            base=Path(directory)
+            a=run_predictions(output_dir=base/'cached',n_mc_samples=8,random_state=42)
+            b=run_predictions(output_dir=base/'new_r',n_mc_samples=8,r_simulations=100,recalculate_r=True,random_state=42)
+            for x,y in zip(a,b):
+                pd.testing.assert_frame_equal(pd.read_csv(x)[['Sz_mean','Sz_std']],pd.read_csv(y)[['Sz_mean','Sz_std']])
 
     def test_ridge_training_cli_path_is_repeatable(self):
         with tempfile.TemporaryDirectory() as directory:

@@ -1,0 +1,23 @@
+{
+  "seed": 42,
+  "generator": "PCG64",
+  "training_rows": 74000,
+  "refitted_selected_estimators": true,
+  "test25": {
+    "GradientBoosting": {
+      "n": 25,
+      "max_prediction_difference": 5.684341886080802e-14
+    },
+    "RandomForest": {
+      "n": 25,
+      "max_prediction_difference": 2.2737367544323206e-13
+    },
+    "Ridge": {
+      "n": 25,
+      "max_prediction_difference": 2.2737367544323206e-13
+    }
+  },
+  "status": "PASS",
+  "reconstruction_samples": 92,
+  "R_and_prediction_streams_independent": true
+}

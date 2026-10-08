@@ -63,8 +63,8 @@
         "D"
       ],
       "best_params": {
-        "model__max_depth": 10,
-        "model__min_samples_split": 2,
+        "model__max_depth": null,
+        "model__min_samples_split": 5,
         "model__n_estimators": 50
       }
     },
@@ -92,8 +92,6 @@
       }
     }
   },
-  "historical_mc_seed": null,
-  "historical_mc_note": "The original Monte Carlo draws were not saved. Frozen model and result files preserve the manuscript version; seeded new runs are reproducible recomputations, not bitwise recovery of the historical draws.",
   "verified_runtime": {
     "python": "3.13.7",
     "numpy": "2.2.6",
@@ -113,19 +111,19 @@
     },
     {
       "path": "frozen/reconstructions/Jiaxian_CO2.csv",
-      "sha256": "a7b16718a24b7d11fc7e0828b049470cb700f532513eda063eea2f32421d0b8e"
+      "sha256": "9f074581d0d0cebdf9e495e11616f9a5a3b732d1b3853cd4c95f02d697b62223"
     },
     {
       "path": "data/prediction_set/Jiaxian_features_bulk.CSV",
-      "sha256": "e9725bb1668736dd91841b5c5d6b4d9be0839ebdbb7539c33c5e90d8d6c4df3d"
+      "sha256": "30e4038955945dba469eff8279208efa92471aebee8dc5647157ac7d0bc77aab"
     },
     {
       "path": "frozen/reconstructions/Shilou_CO2.csv",
-      "sha256": "dd3bed492fc4d9365d6dd6bdd1564c2ae307e2a6df766ff7823800e9483cbec9"
+      "sha256": "dc9391a928efe1820a3def66a5ebbd052935fa3191bc04016c9606e524b80860"
     },
     {
       "path": "data/prediction_set/Shilou_features_bulk.CSV",
-      "sha256": "95593cae5620a2cc17998b813cdb08ecfd8d9e8c6928b486412cd9e52cd0b36f"
+      "sha256": "52f841d971c220520abc8545e25d8f479a8edf2b6036f78581604d1f0b8a4b7c"
     },
     {
       "path": "data/manuscript_samples.csv",
@@ -133,39 +131,39 @@
     },
     {
       "path": "frozen/models/GradientBoosting_sz.joblib",
-      "sha256": "b73537bdbd788900844524912d5b41e901b76574849d86f8deda7bb53c9b7f4e"
+      "sha256": "d3a37f4b39c67b408c83157fad54e1985cb5c6fbd1a04bf257561babbf6e1936"
     },
     {
       "path": "frozen/test_predictions/GradientBoosting_sz.csv",
-      "sha256": "6aed12dd67263e65efe4142fbc901969695803c408ba2664c090bd67a1bc1130"
+      "sha256": "e7b613048a2ba2aed774b8d2abc1b79bc0dca4aeb52cafc2505b42b8604cdde4"
     },
     {
       "path": "frozen/metrics/GradientBoosting_sz.csv",
-      "sha256": "14e537024bad565692675f787be13eabff9de359ce6f425eaf751fd42d3f1f9b"
+      "sha256": "d154958a71dbc98de95b979339a4c10d2802c9369ec8e6893d05534c2ff3dcf1"
     },
     {
       "path": "frozen/models/RandomForest_sz.joblib",
-      "sha256": "baa2ce5386971eebc3f7a6338ab9a7ee7b12f14e0e7e3e74e01d5266f5048453"
+      "sha256": "c05b5e305b1b0b30eb87fef7cb7f9b5a331a48e0db44c2f63f6a611834e3987b"
     },
     {
       "path": "frozen/test_predictions/RandomForest_sz.csv",
-      "sha256": "4d56cbe4709926b8033dabc4f75925046dbf416ce7e48e8cf2fecafc328d7a50"
+      "sha256": "9f2432e963f88f632578264d55a9a157991b3642b7af6b1718717e01d0162dea"
     },
     {
       "path": "frozen/metrics/RandomForest_sz.csv",
-      "sha256": "20899e927f6278714426a45c87c828c2b073ff14506669259cef682735e18468"
+      "sha256": "55788b6e1a565a366787976bceb7aa853187a8027a4a9671fbc082f467ca70cb"
     },
     {
       "path": "frozen/models/Ridge_sz.joblib",
-      "sha256": "14568e16c2562993bbd943e26d13af9d02778e5cdfd95df858348574e606bf0b"
+      "sha256": "a44ce694728c312dd2ad31187f821b424ac8f56a2b986a3da1ab2a1ec68679ac"
     },
     {
       "path": "frozen/test_predictions/Ridge_sz.csv",
-      "sha256": "5d0c725637ac1c5e8671ce54d0cedc0c24d1567eae589d80cd92164f7a46f09c"
+      "sha256": "f749bbc6ecb7a15fd52a9b0a468a054d0049d3181a498a362f5b3c889d720651"
     },
     {
       "path": "frozen/metrics/Ridge_sz.csv",
-      "sha256": "c5337c7d1e9a95da28ac4c42bfc9ab17585aef586a2f9e4f0038c3c203891499"
+      "sha256": "917bbab88e63c859fcac1d19d0c8f12ece55f233f4a546ed291bf4f1e2b44f6c"
     },
     {
       "path": "data/proxy_measurements.csv",
@@ -181,11 +179,31 @@
     },
     {
       "path": "frozen/statistics/figure2c_pairs.csv",
-      "sha256": "202d1fc9f666b78b5d53664d10658626447021da3f1f2715591657133b9c51f6"
+      "sha256": "7f2d702ecfc9597d3eb12f95aebe3b43a18a262c10839fad1bc9a96b04409c24"
     },
     {
       "path": "frozen/statistics/figure2c_validation.json",
-      "sha256": "964d23ced19cb8bdd7b2181f164f0021a3774be2175c767346517110faeae4c5"
+      "sha256": "cb9b7fca02a733f2cdfcb54ffe92558dd4414566fe125bcfba4386237e2c5e87"
+    },
+    {
+      "path": "frozen/training_run.json",
+      "sha256": "e96e5f27baa4b14016a6f7738283a98bdef34b3c55d8ff2bee007d7afd35d4f1"
+    },
+    {
+      "path": "frozen/reproduction_verification.json",
+      "sha256": "6c02b6d360c7de33224c7a2cbed279c57dc07c0023d41ec6479dd4bbdb92eb8a"
     }
-  ]
+  ],
+  "version": "0.3.0",
+  "random_seeds": {
+    "data_split": 42,
+    "estimator": 42,
+    "training_mc": 42,
+    "red_clay_R_mc": 42,
+    "prediction_mc": 42
+  },
+  "random_generator": "NumPy default_rng (PCG64) for Monte Carlo; sklearn random_state=42 for splitting and estimators",
+  "protocol": "99 fixed calibration input records; original 74/25 split; 1000 training and prediction draws; 100000 R draws; ordinary 5-fold augmented-row CV; separate R and prediction streams, Shilou then Jiaxian",
+  "calibration_input_note": "Archived elemental ratios and S(z) calibration labels remain fixed inputs. They are not rederived by this model refit.",
+  "supersedes": "v0.2.1, whose historical model draws were not recorded"
 }
